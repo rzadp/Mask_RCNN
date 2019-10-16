@@ -1003,8 +1003,9 @@ def build_fpn_mask_graph(rois, feature_maps, image_meta,
     if mask_shape[0] == 28 and mask_shape[1] == 28: mask_layers = 1
     if mask_shape[0] == 56 and mask_shape[1] == 56: mask_layers = 2
     for i in range(mask_layers):
+        name = "mrcnn_mask_deconv" + str(i)
         x = KL.TimeDistributed(KL.Conv2DTranspose(256, (2, 2), strides=2, activation="relu"),
-                           name=f'mrcnn_mask_deconv{i}')(x)
+                           name=name)(x)
 
 
     x = KL.TimeDistributed(KL.Conv2D(num_classes, (1, 1), strides=1, activation="sigmoid"),
@@ -2008,7 +2009,7 @@ class MaskRCNN():
                                               input_image_meta,
                                               config.MASK_POOL_SIZE,
                                               config.NUM_CLASSES,
-                                              config.MASK_SHAPE
+                                              config.MASK_SHAPE,
                                               train_bn=config.TRAIN_BN)
 
             # TODO: clean up (use tf.identify if necessary)
@@ -2057,7 +2058,7 @@ class MaskRCNN():
                                               input_image_meta,
                                               config.MASK_POOL_SIZE,
                                               config.NUM_CLASSES,
-                                              config.MASK_SHAPE
+                                              config.MASK_SHAPE,
                                               train_bn=config.TRAIN_BN)
 
             model = KM.Model([input_image, input_image_meta, input_anchors],
