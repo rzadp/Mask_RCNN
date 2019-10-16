@@ -954,7 +954,7 @@ def fpn_classifier_graph(rois, feature_maps, image_meta,
 
 
 def build_fpn_mask_graph(rois, feature_maps, image_meta,
-                         pool_size, num_classes, train_bn=True):
+                         pool_size, num_classes, mask_shape, train_bn=True):
     """Builds the computation graph of the mask head of Feature Pyramid Network.
 
     rois: [batch, num_rois, (y1, x1, y2, x2)] Proposal boxes in normalized
@@ -964,6 +964,7 @@ def build_fpn_mask_graph(rois, feature_maps, image_meta,
     image_meta: [batch, (meta data)] Image details. See compose_image_meta()
     pool_size: The width of the square feature map generated from ROI Pooling.
     num_classes: number of classes, which determines the depth of the results
+    mask_shape: mask shape from the configuration
     train_bn: Boolean. Train or freeze Batch Norm layers
 
     Returns: Masks [batch, num_rois, MASK_POOL_SIZE, MASK_POOL_SIZE, NUM_CLASSES]
@@ -998,11 +999,12 @@ def build_fpn_mask_graph(rois, feature_maps, image_meta,
                            name='mrcnn_mask_bn4')(x, training=train_bn)
     x = KL.Activation('relu')(x)
 
-    x = KL.TimeDistributed(KL.Conv2DTranspose(256, (2, 2), strides=2, activation="relu"),
-                           name="mrcnn_mask_deconv")(x)
-
-    # Uncomment with [56, 56]
-    # x = KL.TimeDistributed(KL.Conv2DTranspose(256, (2, 2), strides=2, activation="relu"), name="mrcnn_mask_deconv_additional")(x)
+    maskLayers = 0
+    if mask_shape[0] == 28 && mask_shape[1] == 28: mask_layers = 1
+    if mask_shape[0] == 56 && mask_shape[1] == 56: mask_layers = 2
+    for i in range(mask_layers):
+        x = KL.TimeDistributed(KL.Conv2DTranspose(256, (2, 2), strides=2, activation="relu"),
+                           name=f'mrcnn_mask_deconv{i}')(x)
 
 
     x = KL.TimeDistributed(KL.Conv2D(num_classes, (1, 1), strides=1, activation="sigmoid"),
@@ -2006,6 +2008,7 @@ class MaskRCNN():
                                               input_image_meta,
                                               config.MASK_POOL_SIZE,
                                               config.NUM_CLASSES,
+                                              config.MASK_SHAPE
                                               train_bn=config.TRAIN_BN)
 
             # TODO: clean up (use tf.identify if necessary)
@@ -2054,6 +2057,7 @@ class MaskRCNN():
                                               input_image_meta,
                                               config.MASK_POOL_SIZE,
                                               config.NUM_CLASSES,
+                                              config.MASK_SHAPE
                                               train_bn=config.TRAIN_BN)
 
             model = KM.Model([input_image, input_image_meta, input_anchors],
