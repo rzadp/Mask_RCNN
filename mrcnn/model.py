@@ -2360,6 +2360,11 @@ class MaskRCNN():
             keras.callbacks.ModelCheckpoint(self.best_path,
                                             verbose=1, save_weights_only=True,
                                             save_best_only=True, monitor="val_loss"),
+            keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.2,
+                              patience=10, min_lr=0.001, verbose=1),
+            keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0,
+                patience=25, verbose=1, mode='auto',
+                baseline=None, restore_best_weights=False)
         ]
 
         # Add custom callbacks to the list
