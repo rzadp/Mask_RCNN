@@ -2361,10 +2361,11 @@ class MaskRCNN():
                                             verbose=1, save_weights_only=True,
                                             save_best_only=True, monitor="val_loss"),
             keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.2,
-                              patience=10, min_lr=0.001, verbose=1),
+                              patience=5, min_lr=0.001, verbose=1, cooldown=5),
             keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0,
                 patience=25, verbose=1, mode='auto',
-                baseline=None, restore_best_weights=False)
+                baseline=None,
+                restore_best_weights=False) # Better not to use https://github.com/keras-team/keras/issues/12511
         ]
 
         # Add custom callbacks to the list
