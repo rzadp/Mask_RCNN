@@ -2278,10 +2278,14 @@ class MaskRCNN():
             self.config.NAME.lower(), now))
 
         # Path to save after each epoch. Include placeholders that get filled by Keras.
-        self.checkpoint_path = os.path.join(self.log_dir, "mask_rcnn_{}.h5".format(
+        self.checkpoint_path = os.path.join(self.log_dir, "mask_rcnn_{}*epoch*.h5".format(
             self.config.NAME.lower()))
         self.checkpoint_path = self.checkpoint_path.replace(
             "*epoch*", "{epoch:04d}")
+        self.checkpoint_path = self.checkpoint_path.replace(
+            "*val_loss*", "{val_loss:.2f}")
+        self.best_path = os.path.join(self.log_dir, "mask_rcnn_{}best.h5".format(
+            self.config.NAME.lower()))
 
     def train(self, train_dataset, val_dataset, learning_rate, epochs, layers,
               augmentation=None, custom_callbacks=None, no_augmentation_sources=None,
@@ -2351,7 +2355,11 @@ class MaskRCNN():
             keras.callbacks.TensorBoard(log_dir=self.log_dir,
                                         histogram_freq=0, write_graph=True, write_images=False),
             keras.callbacks.ModelCheckpoint(self.checkpoint_path,
-                                            verbose=0, save_weights_only=True),
+                                            verbose=0, save_weights_only=True,
+                                            period=50),
+            keras.callbacks.ModelCheckpoint(self.best_path,
+                                            verbose=1, save_weights_only=True,
+                                            save_best_only=True, monitor="val_loss"),
         ]
 
         # Add custom callbacks to the list
