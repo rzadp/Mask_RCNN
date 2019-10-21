@@ -1002,7 +1002,7 @@ def build_fpn_mask_graph(rois, feature_maps, image_meta,
     maskLayers = 0
     if mask_shape[0] == 28 and mask_shape[1] == 28: mask_layers = 1
     if mask_shape[0] == 56 and mask_shape[1] == 56: mask_layers = 2
-    if mask_shape[0] == 128 and mask_shape[1] == 128: mask_layers = 3
+    if mask_shape[0] == 112 and mask_shape[1] == 112: mask_layers = 3
     for i in range(mask_layers):
         name = "mrcnn_mask_deconv" + str(i)
         x = KL.TimeDistributed(KL.Conv2DTranspose(256, (2, 2), strides=2, activation="relu"),
