@@ -1002,6 +1002,7 @@ def build_fpn_mask_graph(rois, feature_maps, image_meta,
     maskLayers = 0
     if mask_shape[0] == 28 and mask_shape[1] == 28: mask_layers = 1
     if mask_shape[0] == 56 and mask_shape[1] == 56: mask_layers = 2
+    if mask_shape[0] == 128 and mask_shape[1] == 128: mask_layers = 3
     for i in range(mask_layers):
         name = "mrcnn_mask_deconv" + str(i)
         x = KL.TimeDistributed(KL.Conv2DTranspose(256, (2, 2), strides=2, activation="relu"),
@@ -2361,7 +2362,7 @@ class MaskRCNN():
                                             verbose=1, save_weights_only=True,
                                             save_best_only=True, monitor="val_loss"),
             keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.2,
-                              patience=5, min_lr=0.00001, verbose=1, cooldown=1),
+                              patience=5, min_lr=0.0000001, verbose=1, cooldown=0),
             keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0,
                 patience=30, verbose=1, mode='auto',
                 baseline=None,
