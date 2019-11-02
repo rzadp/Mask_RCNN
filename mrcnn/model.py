@@ -12,7 +12,9 @@ import random
 import datetime
 import re
 import math
-import logging
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
+import tensorflow as tf
+tf.logging.set_verbosity(tf.logging.ERROR)
 from collections import OrderedDict
 import multiprocessing
 import numpy as np
